@@ -12,6 +12,7 @@ interface ScheduleCardProps {
   onViewProgress?: () => void;
   onMoreOptions?: () => void;
   onPress?: () => void;
+  disabled?: boolean;
 }
 
 const ScheduleCard: React.FC<ScheduleCardProps> = ({
@@ -20,7 +21,8 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
   onClockOut,
   onViewProgress,
   onMoreOptions,
-  onPress
+  onPress,
+  disabled = false
 }) => {
   const formatTime = (timeString: string) => {
     return new Date(timeString).toLocaleTimeString('en-US', {
@@ -57,9 +59,10 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
         return (
           <Button
             variant="primary"
-            onPress={onClockIn}
+            onPress={disabled ? undefined : onClockIn}
             fullWidth
             rounded
+            disabled={disabled}
           >
             Clock-In Now
           </Button>
@@ -70,17 +73,19 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
             <Button
               variant="primary"
               outlined={true}
-              onPress={onViewProgress}
+              onPress={disabled ? undefined : onViewProgress}
               style={styles.halfButton}
               rounded
+              disabled={disabled}
             >
               View Progress
             </Button>
             <Button
               variant="primary"
-              onPress={onClockOut}
+              onPress={disabled ? undefined : onClockOut}
               style={styles.halfButton}
               rounded
+              disabled={disabled}
             >
               Clock-Out Now
             </Button>
@@ -91,9 +96,10 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
           <Button
             variant="primary"
             outlined={true}
-            onPress={onViewProgress}
+            onPress={disabled ? undefined : onViewProgress}
             fullWidth
             rounded
+            disabled={disabled}
           >
             View Report
           </Button>

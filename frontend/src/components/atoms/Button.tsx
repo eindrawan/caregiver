@@ -5,7 +5,7 @@ import TextComponent from './Text';
 
 interface Props {
     title?: string;
-    onPress: () => void;
+    onPress?: () => void;
     variant?: 'primary' | 'secondary' | 'error';
     disabled?: boolean;
     rounded?: boolean;
@@ -94,9 +94,9 @@ const Button: React.FC<Props> = ({
 
     return (
         <TouchableOpacity
-            style={[baseStyle, getButtonStyle(), disabled && styles.disabled]}
+            style={[baseStyle, getButtonStyle(), disabled && styles.disabled, !onPress && styles.disabled]}
             onPress={onPress}
-            disabled={disabled}
+            disabled={disabled || !onPress}
             activeOpacity={0.7}
         >
             {children ? (

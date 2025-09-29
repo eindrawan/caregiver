@@ -14,6 +14,7 @@ interface ScheduleListProps {
   onSchedulePress?: (schedule: Schedule) => void;
   showSeeAll?: boolean;
   onSeeAll?: () => void;
+  disabled?: boolean;
 }
 
 const ScheduleList: React.FC<ScheduleListProps> = ({
@@ -24,7 +25,8 @@ const ScheduleList: React.FC<ScheduleListProps> = ({
   onMoreOptions,
   onSchedulePress,
   showSeeAll = true,
-  onSeeAll
+  onSeeAll,
+  disabled = false
 }) => {
   const renderScheduleCard = ({ item }: { item: Schedule }) => (
     <ScheduleCard
@@ -34,6 +36,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({
       onViewProgress={() => onViewProgress?.(item)}
       onMoreOptions={() => onMoreOptions?.(item)}
       onPress={() => onSchedulePress?.(item)}
+      disabled={disabled}
     />
   );
 

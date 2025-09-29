@@ -252,6 +252,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           onMoreOptions={handleMoreOptions}
           onSchedulePress={handleSchedulePress}
           onSeeAll={handleSeeAll}
+          disabled={startVisitMutation.isPending || endVisitMutation.isPending}
         />
         {/* Footer */}
         {isLargeScreen && (<Footer />)}
