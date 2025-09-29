@@ -189,3 +189,31 @@ export const showLocationErrorAlert = (error: LocationError, onRetry?: () => voi
   );
 };
 
+/**
+ * Geocode an address using OpenStreetMap Nominatim (no API key required)
+ */
+export const geocodeAddress = async (address: string): Promise<LocationData> => {
+  const encodedAddress = encodeURIComponent(address);
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&addressdetails=1`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data.length > 0) {
+      return {
+        latitude: parseFloat(data[0].lat),
+        longitude: parseFloat(data[0].lon),
+      };
+    } else {
+      throw new Error('Address not found');
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    throw new LocationError('GEOCODING_FAILED', 'Could not find location for the address provided. Please check the address and try again.');
+  }
+};
+

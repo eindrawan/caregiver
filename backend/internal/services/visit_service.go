@@ -51,6 +51,13 @@ func (s *VisitService) CreateVisit(visit *models.Visit) error {
 		return fmt.Errorf("visit validation failed: %w", err)
 	}
 
+	// Set location status based on provided location data
+	if visit.StartLatitude != nil && visit.StartLongitude != nil {
+		visit.LocationStatus = "confirmed"
+	} else {
+		visit.LocationStatus = "pending"
+	}
+
 	if err := s.visitRepo.Create(visit); err != nil {
 		s.logger.WithError(err).WithField("schedule_id", visit.ScheduleID).Error("Failed to create visit")
 		return fmt.Errorf("failed to create visit: %w", err)
@@ -71,6 +78,15 @@ func (s *VisitService) UpdateVisit(visit *models.Visit) error {
 	if err := s.validateVisit(visit); err != nil {
 		s.logger.WithError(err).WithField("visit_id", visit.ID).Error("Visit validation failed")
 		return fmt.Errorf("visit validation failed: %w", err)
+	}
+
+	// Set location status based on provided location data
+	hasLocation := (visit.StartLatitude != nil && visit.StartLongitude != nil) ||
+		(visit.EndLatitude != nil && visit.EndLongitude != nil)
+	if hasLocation {
+		visit.LocationStatus = "confirmed"
+	} else if visit.LocationStatus == "" {
+		visit.LocationStatus = "pending"
 	}
 
 	if err := s.visitRepo.Update(visit); err != nil {
@@ -109,6 +125,7 @@ func (s *VisitService) EndVisit(scheduleID int, latitude, longitude float64, not
 	visit.EndLatitude = &latitude
 	visit.EndLongitude = &longitude
 	visit.Status = "completed"
+	visit.LocationStatus = "confirmed" // End location provided, so confirmed
 	if notes != "" {
 		visit.Notes = notes
 	}
@@ -140,6 +157,11 @@ func (s *VisitService) validateVisit(visit *models.Visit) error {
 
 	if !validStatuses[visit.Status] {
 		return fmt.Errorf("invalid status: %s", visit.Status)
+	}
+
+	// Validate location status
+	if visit.LocationStatus != "" && visit.LocationStatus != "pending" && visit.LocationStatus != "confirmed" {
+		return fmt.Errorf("invalid location_status: %s. Must be 'pending' or 'confirmed'", visit.LocationStatus)
 	}
 
 	// If status is in_progress, start time and location should be set

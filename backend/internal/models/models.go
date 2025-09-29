@@ -51,6 +51,7 @@ type Visit struct {
 	StartLongitude *float64   `json:"start_longitude" db:"start_longitude"`
 	EndLatitude    *float64   `json:"end_latitude" db:"end_latitude"`
 	EndLongitude   *float64   `json:"end_longitude" db:"end_longitude"`
+	LocationStatus string     `json:"location_status" db:"location_status" validate:"oneof=pending confirmed"`
 	Status         string     `json:"status" db:"status" validate:"required,oneof=not_started in_progress completed"`
 	Notes          string     `json:"notes" db:"notes"`
 	CreatedAt      time.Time  `json:"created_at" db:"created_at"`

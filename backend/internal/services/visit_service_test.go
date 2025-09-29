@@ -7,6 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestVisitService_GetVisitByScheduleID(t *testing.T) {
@@ -285,5 +286,160 @@ func TestVisitService_UpdateVisit(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify mock expectations
+	mockVisitRepo.AssertExpectations(t)
+}
+
+func TestVisitService_EndVisit(t *testing.T) {
+	// Setup
+	mockVisitRepo := new(MockVisitRepository)
+	logger := logrus.New()
+	service := NewVisitService(mockVisitRepo, logger)
+
+	// Test data
+	now := time.Now()
+	lat := 40.7128
+	lng := -74.0060
+	initialVisit := &models.Visit{
+		ID:             1,
+		ScheduleID:     1,
+		StartTime:      &now,
+		StartLatitude:  &lat,
+		StartLongitude: &lng,
+		Status:         "in_progress",
+		LocationStatus: "confirmed",
+	}
+
+	// Mock expectations
+	mockVisitRepo.On("GetByScheduleID", 1).Return(initialVisit, nil)
+	mockVisitRepo.On("Update", mock.AnythingOfType("*models.Visit")).Return(nil).Run(func(args mock.Arguments) {
+		updatedVisit := args.Get(0).(*models.Visit)
+		updatedVisit.EndTime = &now
+		updatedVisit.EndLatitude = &lat
+		updatedVisit.EndLongitude = &lng
+		updatedVisit.Status = "completed"
+		updatedVisit.LocationStatus = "confirmed"
+		updatedVisit.Notes = "Test notes"
+	})
+
+	// Execute
+	err := service.EndVisit(1, lat, lng, "Test notes")
+
+	// Assert
+	assert.NoError(t, err)
+
+	// Verify
+	updatedCall := mockVisitRepo.Calls[1]
+	assert.Len(t, updatedCall.Arguments, 1)
+	updatedVisit := updatedCall.Arguments[0].(*models.Visit)
+	assert.Equal(t, "completed", updatedVisit.Status)
+	assert.Equal(t, "confirmed", updatedVisit.LocationStatus)
+	assert.NotNil(t, updatedVisit.EndTime)
+	assert.Equal(t, "Test notes", updatedVisit.Notes)
+
+	mockVisitRepo.AssertExpectations(t)
+}
+
+func TestVisitService_CreateVisit_LocationStatusPending(t *testing.T) {
+	// Setup
+	mockVisitRepo := new(MockVisitRepository)
+	logger := logrus.New()
+	service := NewVisitService(mockVisitRepo, logger)
+
+	// Test data - no location
+	visit := &models.Visit{
+		ScheduleID: 1,
+		Status:     "not_started",
+	}
+
+	// Mock expectations
+	mockVisitRepo.On("Create", mock.MatchedBy(func(v *models.Visit) bool {
+		return v.LocationStatus == "pending"
+	})).Return(nil)
+
+	// Execute
+	err := service.CreateVisit(visit)
+
+	// Assert
+	assert.NoError(t, err)
+	mockVisitRepo.AssertExpectations(t)
+}
+
+func TestVisitService_CreateVisit_LocationStatusConfirmed(t *testing.T) {
+	// Setup
+	mockVisitRepo := new(MockVisitRepository)
+	logger := logrus.New()
+	service := NewVisitService(mockVisitRepo, logger)
+
+	// Test data - with location
+	now := time.Now()
+	lat := 40.7128
+	lng := -74.0060
+	visit := &models.Visit{
+		ScheduleID:     1,
+		Status:         "in_progress",
+		StartTime:      &now,
+		StartLatitude:  &lat,
+		StartLongitude: &lng,
+	}
+
+	// Mock expectations
+	mockVisitRepo.On("Create", mock.MatchedBy(func(v *models.Visit) bool {
+		return v.LocationStatus == "confirmed"
+	})).Return(nil)
+
+	// Execute
+	err := service.CreateVisit(visit)
+
+	// Assert
+	assert.NoError(t, err)
+	mockVisitRepo.AssertExpectations(t)
+}
+
+func TestVisitService_ValidateVisit_InvalidLocationStatus(t *testing.T) {
+	// Setup
+	mockVisitRepo := new(MockVisitRepository)
+	logger := logrus.New()
+	service := NewVisitService(mockVisitRepo, logger)
+
+	// Test data
+	visit := &models.Visit{
+		ScheduleID:     1,
+		Status:         "not_started",
+		LocationStatus: "invalid",
+	}
+
+	// Execute
+	err := service.CreateVisit(visit)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid location_status")
+
+	mockVisitRepo.AssertExpectations(t)
+}
+
+func TestVisitService_EndVisit_NotStarted(t *testing.T) {
+	// Setup
+	mockVisitRepo := new(MockVisitRepository)
+	logger := logrus.New()
+	service := NewVisitService(mockVisitRepo, logger)
+
+	// Test data - no start time
+	visit := &models.Visit{
+		ID:         1,
+		ScheduleID: 1,
+		Status:     "not_started",
+	}
+
+	// Mock expectations
+	mockVisitRepo.On("GetByScheduleID", 1).Return(visit, nil)
+
+	// Execute
+	err := service.EndVisit(1, 40.7128, -74.0060, "")
+
+	// Assert
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "cannot end visit that hasn't been started")
+
 	mockVisitRepo.AssertExpectations(t)
 }

@@ -32,16 +32,17 @@ export interface Schedule {
 }
 
 export interface Visit {
-  id: number;
-  schedule_id: number;
-  start_time?: string;
-  end_time?: string;
-  start_latitude?: number;
-  start_longitude?: number;
-  end_latitude?: number;
-  end_longitude?: number;
-  status: 'not_started' | 'in_progress' | 'completed';
-  notes?: string;
+	id: number;
+	schedule_id: number;
+	start_time?: string;
+	end_time?: string;
+	start_latitude?: number;
+	start_longitude?: number;
+	end_latitude?: number;
+	end_longitude?: number;
+	location_status: 'pending' | 'confirmed';
+	status: 'not_started' | 'in_progress' | 'completed';
+	notes?: string;
 }
 
 export interface Task {
