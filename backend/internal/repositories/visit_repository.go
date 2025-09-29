@@ -46,12 +46,15 @@ func (r *visitRepository) GetByScheduleID(scheduleID int) (*models.Visit, error)
 
 // Create creates a new visit
 func (r *visitRepository) Create(visit *models.Visit) error {
+	startTimeFormatted := visit.StartTime.Format("2006-01-02 15:04:05")
+	endTimeFormatted := visit.EndTime.Format("2006-01-02 15:04:05")
+
 	query := `
 	INSERT INTO visits (schedule_id, start_time, end_time, start_latitude, start_longitude,
-		                   end_latitude, end_longitude, status, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+		                   end_latitude, end_longitude, status, notes, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 
-	result, err := r.db.Exec(query, visit.ScheduleID, visit.StartTime, visit.EndTime,
+	result, err := r.db.Exec(query, visit.ScheduleID, startTimeFormatted, endTimeFormatted,
 		visit.StartLatitude, visit.StartLongitude, visit.EndLatitude, visit.EndLongitude,
 		visit.Status, visit.Notes)
 	if err != nil {
@@ -69,13 +72,16 @@ func (r *visitRepository) Create(visit *models.Visit) error {
 
 // Update updates an existing visit
 func (r *visitRepository) Update(visit *models.Visit) error {
+	startTimeFormatted := visit.StartTime.Format("2006-01-02 15:04:05")
+	endTimeFormatted := visit.EndTime.Format("2006-01-02 15:04:05")
+
 	query := `
 	UPDATE visits
 	SET start_time = ?, end_time = ?, start_latitude = ?, start_longitude = ?,
 		    end_latitude = ?, end_longitude = ?, status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
-	_, err := r.db.Exec(query, visit.StartTime, visit.EndTime, visit.StartLatitude, visit.StartLongitude,
+	_, err := r.db.Exec(query, startTimeFormatted, endTimeFormatted, visit.StartLatitude, visit.StartLongitude,
 		visit.EndLatitude, visit.EndLongitude, visit.Status, visit.Notes, visit.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update visit: %w", err)

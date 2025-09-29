@@ -9,12 +9,13 @@ import {
 import { StackScreenProps } from '@react-navigation/stack';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { colors, spacing } from '../constants';
-import { ContainerView, Text } from '../components/atoms';
+import { Text } from '../components/atoms';
 import {
   StatusCard,
   StatsOverview,
   ScheduleList,
-  CustomHeader
+  Footer,
+  ContainerView
 } from '../components/organisms';
 import { Schedule } from '../services/types';
 import { useTodaySchedules, useScheduleStats, useStartVisit, useEndVisit } from '../hooks/useSchedules';
@@ -171,14 +172,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ContainerView style={styles.container}>
-      {/* Custom Header - only show on large screens */}
-      {isLargeScreen && (
-        <CustomHeader
-          userName={currentUser.name}
-          userEmail="Admin@healthcare.io"
-        />
-      )}
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
@@ -207,7 +200,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         {/* Current Status Card */}
         {currentSchedule && (
           <StatusCard
-            user={currentUser}
+            user={currentSchedule.client}
             location={currentSchedule.client?.address || 'No address available'}
             timeRange={`${new Date(currentSchedule.start_time).toLocaleTimeString('en-US', {
               hour: '2-digit',
@@ -237,6 +230,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           onSchedulePress={handleSchedulePress}
           onSeeAll={handleSeeAll}
         />
+        {/* Footer */}
+        {isLargeScreen && (<Footer />)}
       </ScrollView>
     </ContainerView>
   );

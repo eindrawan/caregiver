@@ -30,7 +30,8 @@ export const colors = {
   background: '#F9FAFB',
   cardBackground: '#FFFFFF',
   accentBackground: '#e5f4ff',
-  accentBackgroundLight: '#f7fcff',
+  accentBackgroundDark: '#2DA6FF80',
+  accentBackgroundLight: '#2DA6FF0A',
 
   // Text colors
   textPrimary: '#212121',

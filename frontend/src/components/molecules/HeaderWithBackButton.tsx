@@ -6,13 +6,20 @@ import { Text, Icon } from '../atoms';
 
 interface HeaderWithBackButtonProps {
     title: string;
+    align?: string,
     onBackPress: () => void;
 }
 
 const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
     title,
+    align = 'center',
     onBackPress
 }) => {
+
+    const leftStyle = align === 'left'
+        ? { marginLeft: spacing.sm, textAlign: 'left' as 'left' }
+        : {};
+
     return (
         <View style={styles.header}>
             <TouchableOpacity
@@ -21,7 +28,7 @@ const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
             >
                 <Icon name="arrow-back" size={24} color="textPrimary" />
             </TouchableOpacity>
-            <Text variant="h2" color="textPrimary" style={styles.headerTitle}>
+            <Text variant="h2" color="textPrimary" style={[styles.headerTitle, leftStyle]}>
                 {title}
             </Text>
             <View style={styles.headerSpacer} />
@@ -35,8 +42,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: spacing.screenPadding,
         paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray200,
+        marginTop: -1,
     },
     backButton: {
         padding: spacing.xs,

@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { colors, spacing, borderRadius } from '../constants';
-import { ContainerView, Text, Button, Icon } from '../components/atoms';
+import { Text, Button, Icon } from '../components/atoms';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
+import { ContainerView } from '../components/organisms';
 
 type Props = StackScreenProps<HomeStackParamList, 'ScheduleCompleted'>;
 

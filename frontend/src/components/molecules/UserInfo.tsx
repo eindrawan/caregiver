@@ -20,6 +20,9 @@ const UserInfo: React.FC<UserInfoProps> = ({
   textColor = 'textPrimary',
   secondaryTextColor = 'textSecondary'
 }) => {
+
+  const nameOnlyStyle = serviceName ? {} : { fontSize: 20 };
+
   return (
     <View style={styles.container}>
       <Avatar
@@ -28,7 +31,7 @@ const UserInfo: React.FC<UserInfoProps> = ({
         size={size}
       />
       <View style={styles.textContainer}>
-        <Text variant="title" color={textColor} style={styles.nameText}>
+        <Text variant="title" color={textColor} style={[styles.nameText, nameOnlyStyle]}>
           {name}
         </Text>
         {serviceName && (

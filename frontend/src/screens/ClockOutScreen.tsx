@@ -7,11 +7,14 @@ import {
 } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { colors, spacing, borderRadius } from '../constants';
-import { ContainerView, Text, Button, Icon } from '../components/atoms';
+import { Text, Button, Icon } from '../components/atoms';
 import { UserInfo, TaskItem, HeaderWithBackButton } from '../components/molecules';
+import { ScheduleCompletedModal } from '../components/modals';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useScheduleById, useEndVisit, useUpdateTaskStatus, useCancelVisit } from '../hooks';
+import useScreenSize from '../hooks/useScreenSize';
 import { showAlert } from '../utils/alert';
+import { ContainerView, Footer } from '../components/organisms';
 
 type Props = StackScreenProps<HomeStackParamList, 'ClockOut'>;
 
@@ -21,9 +24,12 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
   const endVisitMutation = useEndVisit();
   const updateTaskMutation = useUpdateTaskStatus();
   const cancelVisitMutation = useCancelVisit();
+  const { isLargeScreen } = useScreenSize();
 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [pendingTaskUpdates, setPendingTaskUpdates] = useState<{ [key: number]: { status: 'completed' | 'not_completed', reason?: string } }>({});
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
+  const [completedScheduleData, setCompletedScheduleData] = useState<{ schedule: any; duration: string } | null>(null);
 
   // Calculate elapsed time
   useEffect(() => {
@@ -58,6 +64,12 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
   const handleAddNewTask = () => {
     // TODO: Implement add new task functionality
     showAlert('Add New Task', 'This feature will be implemented soon.');
+  };
+
+  const handleModalClose = () => {
+    setShowCompletedModal(false);
+    setCompletedScheduleData(null);
+    navigation.navigate('HomeMain');
   };
 
   const handleCancelClockIn = () => {
@@ -185,11 +197,17 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
         durationText = `${minutes} minute${minutes > 1 ? 's' : ''}`;
       }
 
-      // Navigate to success screen
-      navigation.navigate('ScheduleCompleted', {
-        schedule,
-        duration: durationText,
-      });
+      // Show modal on large screens, navigate on mobile
+      if (isLargeScreen) {
+        setCompletedScheduleData({ schedule, duration: durationText });
+        setShowCompletedModal(true);
+      } else {
+        // Navigate to success screen
+        navigation.navigate('ScheduleCompleted', {
+          schedule,
+          duration: durationText,
+        });
+      }
     } catch (error) {
       showAlert(
         'Clock Out Failed',
@@ -201,7 +219,7 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
 
   if (isLoading) {
     return (
-      <ContainerView style={styles.container}>
+      <ContainerView style={styles.container} title="Clock-Out" onBackPress={() => navigation.goBack()}>
         <View style={styles.loadingContainer}>
           <Text variant="body" color="textSecondary">Loading...</Text>
         </View>
@@ -211,7 +229,7 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
 
   if (error || !schedule) {
     return (
-      <ContainerView style={styles.container}>
+      <ContainerView style={styles.container} title="Clock-Out" onBackPress={() => navigation.goBack()}>
         <View style={styles.loadingContainer}>
           <Text variant="body" color="textSecondary">
             {error ? 'Error loading schedule' : 'Schedule not found'}
@@ -221,18 +239,8 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
     );
   }
 
-  const currentUser = {
-    name: schedule.client?.name || 'Unknown Client',
-    avatar: undefined, // Will use default avatar
-  };
-
   return (
-    <ContainerView style={styles.container}>
-      {/* Header  */}
-      <HeaderWithBackButton
-        title="Clock-Out"
-        onBackPress={() => navigation.goBack()}
-      />
+    <ContainerView style={styles.container} title="Clock-Out" onBackPress={() => navigation.goBack()}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Timer */}
         <View style={styles.timerContainer}>
@@ -243,8 +251,9 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
 
         {/* Service Info */}
         <View style={styles.serviceSection}>
-          <Text variant="h3" color="textPrimary" style={styles.serviceName}>
-            {schedule.service_name || '- no service name -'}
+          {/* Service Name */}
+          <Text variant="h1" color="textSecondary" style={styles.serviceName}>
+            {schedule.service_name || 'Service Name A'}
           </Text>
           <UserInfo
             name={schedule.client?.name || 'Unknown Client'}
@@ -341,7 +350,19 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
             {endVisitMutation.isPending || updateTaskMutation.isPending ? 'Processing...' : 'Clock Out'}
           </Button>
         </View>
+        {/* Footer */}
+        {isLargeScreen && (<Footer />)}
       </ScrollView>
+
+      {/* Schedule Completed Modal - only show on large screens */}
+      {completedScheduleData && (
+        <ScheduleCompletedModal
+          visible={showCompletedModal}
+          schedule={completedScheduleData.schedule}
+          duration={completedScheduleData.duration}
+          onClose={handleModalClose}
+        />
+      )}
     </ContainerView>
   );
 };

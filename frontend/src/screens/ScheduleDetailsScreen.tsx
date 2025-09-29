@@ -8,12 +8,13 @@ import {
 } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { colors, spacing, borderRadius, shadows } from '../constants';
-import { ContainerView, Text, Button, Icon } from '../components/atoms';
-import { HeaderWithBackButton, UserInfo } from '../components/molecules';
+import { Text, Button, Icon } from '../components/atoms';
+import { HeaderWithBackButton, ScheduleItem, UserInfo } from '../components/molecules';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useScheduleById, useStartVisit } from '../hooks/useSchedules';
 import { getCurrentLocation, showLocationErrorAlert, LocationError } from '../services/locationService';
 import { showAlert } from '../utils/alert';
+import { ContainerView, Footer } from '../components/organisms';
 
 type Props = StackScreenProps<HomeStackParamList, 'ScheduleDetails'>;
 
@@ -111,7 +112,7 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
   if (isLoading) {
     return (
-      <ContainerView style={styles.container}>
+      <ContainerView style={styles.container} title="Schedule Details" onBackPress={() => navigation.goBack()}>
         <View style={styles.loadingContainer}>
           <Text variant="body" color="textSecondary">Loading...</Text>
         </View>
@@ -121,7 +122,7 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
   if (error || !schedule) {
     return (
-      <ContainerView style={styles.container}>
+      <ContainerView style={styles.container} title="Schedule Details" onBackPress={() => navigation.goBack()}>
         <View style={styles.loadingContainer}>
           <Text variant="body" color="textSecondary">
             {error ? 'Error loading schedule' : 'Schedule not found'}
@@ -131,44 +132,32 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     );
   }
 
+  // Detect large screen (e.g., tablets)
+  const { width } = require('react-native').useWindowDimensions();
+  const isLargeScreen = width >= 768;
+
   return (
-    <ContainerView style={styles.container}>
-      {/* Header */}
-      <HeaderWithBackButton
-        title="Schedule Details"
-        onBackPress={() => navigation.goBack()}
-      />
-
+    <ContainerView style={styles.container} title="Schedule Details" onBackPress={() => navigation.goBack()}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        {/* Service Name */}
-        <Text variant="h2" color="textPrimary" style={styles.serviceName}>
-          {schedule.service_name || 'Service Name A'}
-        </Text>
+        <View style={styles.headerSection}>
+          {/* Service Name */}
+          <Text variant="h1" color="textSecondary" style={styles.serviceName}>
+            {schedule.service_name || 'Service Name A'}
+          </Text>
 
-        {/* Client Info */}
-        <View style={styles.clientSection}>
-          <UserInfo
-            name={schedule.client?.name || 'Unknown Client'}
-            size="large"
-          />
-        </View>
-
-        {/* Date and Time */}
-        <View style={styles.dateTimeSection}>
-          <View style={styles.dateTimeRow}>
-            <View style={styles.dateTimeItem}>
-              <Icon name="calendar-outline" size={20} color="primary" />
-              <Text variant="body" color="textPrimary" style={styles.dateTimeText}>
-                {formatDate(schedule.start_time)}
-              </Text>
-            </View>
-            <View style={styles.dateTimeItem}>
-              <Icon name="time-outline" size={20} color="primary" />
-              <Text variant="body" color="textPrimary" style={styles.dateTimeText}>
-                {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
-              </Text>
-            </View>
+          {/* Client Info */}
+          <View style={styles.clientSection}>
+            <UserInfo
+              name={schedule.client?.name || 'Unknown Client'}
+              size="large"
+            />
           </View>
+
+          {/* Date and Time */}
+          <ScheduleItem
+            dateTime={formatDate(schedule.start_time)}
+            timeRange={`${formatTime(schedule.start_time)} - ${formatTime(schedule.end_time)}`}
+          />
         </View>
 
         {/* Client Contact */}
@@ -258,6 +247,8 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
             {isClockingIn || startVisitMutation.isPending ? 'Clocking In...' : 'Clock In Now'}
           </Button>
         )}
+        {/* Footer */}
+        {isLargeScreen && (<Footer />)}
       </ScrollView>
     </ContainerView>
   );
@@ -267,6 +258,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  headerSection: {
+    marginBottom: spacing.lg,
+    backgroundColor: colors.accentBackgroundLight,
+    padding: spacing.lg,
+    borderRadius: spacing.lg,
   },
   scrollView: {
     flex: 1,

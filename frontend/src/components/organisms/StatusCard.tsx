@@ -69,6 +69,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
         variant="secondary"
         onPress={onClockOut}
         fullWidth
+        style={styles.button}
       >
         <View style={styles.buttonContent}>
           <Icon name="stopwatch" size={24} color="primary" />
@@ -118,6 +119,10 @@ const styles = StyleSheet.create({
   timeText: {
     marginLeft: spacing.sm,
     flex: 1,
+  },
+  button: {
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   buttonContent: {
     flexDirection: 'row',

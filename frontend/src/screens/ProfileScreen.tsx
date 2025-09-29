@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '../constants';
-import { ContainerView, Text, Button } from '../components/atoms';
+import { Text, Button } from '../components/atoms';
+import { ContainerView } from '../components/organisms';
 
 const ProfileScreen: React.FC = () => {
   const handleLogout = () => {

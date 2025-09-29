@@ -39,7 +39,7 @@ const Button: React.FC<Props> = ({
 
     const outlineStyle = {
         backgroundColor: 'transparent',
-        borderColor: colors.primary,
+        borderColor: colors.accentBackgroundDark,
     };
 
     const secondaryStyle = {
