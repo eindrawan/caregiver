@@ -1,0 +1,400 @@
+definitions:
+  models.TaskUpdateRequest:
+    properties:
+      reason:
+        description: Required when status is "not_completed"
+        type: string
+      status:
+        enum:
+        - completed
+        - not_completed
+        type: string
+    required:
+    - status
+    type: object
+  models.VisitEndRequest:
+    properties:
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+      notes:
+        type: string
+    required:
+    - latitude
+    - longitude
+    type: object
+  models.VisitStartRequest:
+    properties:
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+    required:
+    - latitude
+    - longitude
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/schedules:
+    get:
+      consumes:
+      - application/json
+      description: Get all schedules with optional filtering by caregiver_id, date,
+        status
+      parameters:
+      - description: Filter by caregiver ID
+        in: query
+        name: caregiver_id
+        type: integer
+      - description: Filter by date (YYYY-MM-DD format)
+        in: query
+        name: date
+        type: string
+      - description: Filter by status (scheduled, in_progress, completed, missed)
+        in: query
+        name: status
+        type: string
+      - description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with schedules data
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all schedules
+      tags:
+      - schedules
+  /api/v1/schedules/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific schedule by ID with full details including visit
+        and tasks
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with schedule details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: schedule not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get schedule by ID
+      tags:
+      - schedules
+  /api/v1/schedules/{id}/end:
+    post:
+      consumes:
+      - application/json
+      description: End a visit for a specific schedule with geolocation
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Visit end request with geolocation and optional notes
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VisitEndRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: schedule not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: End a visit
+      tags:
+      - schedules
+  /api/v1/schedules/{id}/start:
+    post:
+      consumes:
+      - application/json
+      description: Start a visit for a specific schedule with geolocation
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Visit start request with geolocation
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VisitStartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: schedule not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Start a visit
+      tags:
+      - schedules
+  /api/v1/schedules/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get schedule statistics for a specific caregiver
+      parameters:
+      - description: Caregiver ID
+        in: query
+        name: caregiver_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with schedule statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get schedule statistics
+      tags:
+      - schedules
+  /api/v1/schedules/today:
+    get:
+      consumes:
+      - application/json
+      description: Get today's schedules for a specific caregiver
+      parameters:
+      - description: Caregiver ID
+        in: query
+        name: caregiver_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with today's schedules
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get today's schedules
+      tags:
+      - schedules
+  /api/v1/tasks/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with task details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: task not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get task by ID
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update the status of a task (completed or not_completed with reason)
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task update request with status and optional reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: task not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update task status
+      tags:
+      - tasks
+  /api/v1/visits/schedule/{scheduleId}:
+    get:
+      consumes:
+      - application/json
+      description: Get visit details for a specific schedule
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: scheduleId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response with visit details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: visit not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get visit by schedule ID
+      tags:
+      - visits
+swagger: "2.0"
