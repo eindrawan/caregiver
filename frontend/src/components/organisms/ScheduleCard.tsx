@@ -363,3 +363,7 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
     minWidth: 100,
+  }
+});
+
+export default ScheduleCard;
