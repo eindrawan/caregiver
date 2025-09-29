@@ -3,14 +3,15 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
 
 // Initialize creates and returns a database connection
 func Initialize(databaseURL string) (*sql.DB, error) {
-	// Add query parameters for better concurrency handling
-	db, err := sql.Open("sqlite", databaseURL+"?_busy_timeout=30000&_txlock=immediate")
+	// Add query parameters for better concurrency handling and corruption prevention
+	db, err := sql.Open("sqlite", databaseURL+"?_busy_timeout=30000&_txlock=immediate&_journal_mode=WAL&_synchronous=NORMAL&_cache_size=1000&_temp_store=MEMORY&_foreign_keys=ON&_journal_size_limit=6710864")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -23,6 +24,12 @@ func Initialize(databaseURL string) (*sql.DB, error) {
 	// Test the connection
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	// First, attempt to check if the database is corrupted
+	if err := checkAndRecoverCorruption(db, databaseURL); err != nil {
+		db.Close() // Close the corrupted connection
+		return nil, fmt.Errorf("database corruption detected and could not be recovered: %w", err)
 	}
 
 	// Enable foreign keys for SQLite
@@ -39,7 +46,7 @@ func Initialize(databaseURL string) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to set synchronous mode: %w", err)
 	}
 
-	if _, err := db.Exec("PRAGMA cache_size = 100"); err != nil {
+	if _, err := db.Exec("PRAGMA cache_size = 1000"); err != nil {
 		return nil, fmt.Errorf("failed to set cache size: %w", err)
 	}
 
@@ -53,6 +60,52 @@ func Initialize(databaseURL string) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+// checkAndRecoverCorruption checks if the database is corrupted and attempts to recover
+func checkAndRecoverCorruption(db *sql.DB, databaseURL string) error {
+	// First, try to run integrity check
+	var result string
+	err := db.QueryRow("PRAGMA integrity_check").Scan(&result)
+	if err != nil {
+		return fmt.Errorf("failed to run integrity check: %w", err)
+	}
+
+	if result != "ok" {
+		// If integrity check fails, try to recover by creating a new database
+		return recoverFromCorruption(db, databaseURL)
+	}
+
+	return nil
+}
+
+// recoverFromCorruption attempts to recover from database corruption by creating a new database
+func recoverFromCorruption(db *sql.DB, databaseURL string) error {
+	fmt.Println("Database corruption detected. Attempting to recover...")
+
+	// Close the current database connection
+	db.Close()
+
+	// Remove the corrupted database files (including WAL and SHM files)
+	// Note: The files might be locked, so we'll continue even if removal fails
+	_ = os.Remove(databaseURL)
+	_ = os.Remove(databaseURL + "-wal")
+	_ = os.Remove(databaseURL + "-shm")
+
+	// Create a new database connection
+	newDB, err := sql.Open("sqlite", databaseURL+"?_busy_timeout=3000&_txlock=immediate&_journal_mode=WAL&_synchronous=NORMAL&_cache_size=1000&_temp_store=MEMORY&_foreign_keys=ON&_journal_size_limit=6710864")
+	if err != nil {
+		return fmt.Errorf("failed to create new database: %w", err)
+	}
+	defer newDB.Close()
+
+	// Run migrations to recreate the schema
+	if err := Migrate(newDB); err != nil {
+		return fmt.Errorf("failed to migrate new database: %w", err)
+	}
+
+	fmt.Println("Database successfully recovered")
+	return nil
 }
 
 // Migrate runs database migrations

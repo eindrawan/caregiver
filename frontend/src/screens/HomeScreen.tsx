@@ -20,6 +20,7 @@ import {
 import { Schedule } from '../services/types';
 import { useTodaySchedules, useScheduleStats, useStartVisit, useEndVisit } from '../hooks/useSchedules';
 import { showAlert } from '../utils/alert';
+import { getCurrentLocation, showLocationErrorAlert, LocationError } from '../services/locationService';
 
 type Props = StackScreenProps<HomeStackParamList, 'HomeMain'>;
 
@@ -108,7 +109,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     ]);
   };
 
-  const handleClockIn = (schedule: Schedule) => {
+  const handleClockIn = async (schedule: Schedule) => {
     showAlert(
       'Clock In',
       `Clock in for ${schedule.client?.name}?`,
@@ -116,17 +117,34 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Clock In',
-          onPress: () => {
-            // Mock location data - in real app get from device GPS
-            const mockLocation = {
-              start_latitude: 40.7128,
-              start_longitude: -74.0060,
-            };
+          onPress: async () => {
+            try {
+              // Get real location data from device GPS
+              const location = await getCurrentLocation();
+              const locationData = {
+                start_latitude: location.latitude,
+                start_longitude: location.longitude,
+              };
 
-            startVisitMutation.mutate({
-              scheduleId: schedule.id,
-              data: mockLocation,
-            });
+              startVisitMutation.mutate({
+                scheduleId: schedule.id,
+                data: locationData,
+              });
+            } catch (error: any) {
+              if (error instanceof LocationError) {
+                showLocationErrorAlert(error, () => handleClockIn(schedule)); // Retry with same schedule
+              } else {
+                // Fallback error handling
+                showAlert(
+                  'Location Error',
+                  'Failed to get your current location. Please try again.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Retry', onPress: () => handleClockIn(schedule) }
+                  ]
+                );
+              }
+            }
           }
         },
       ]
@@ -198,7 +216,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         {/* Current Status Card */}
-        {currentSchedule && (
+        {currentSchedule && currentSchedule.client && (
           <StatusCard
             user={currentSchedule.client}
             location={currentSchedule.client?.address || 'No address available'}

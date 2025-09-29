@@ -226,7 +226,7 @@ const ScheduleCompletedModal: React.FC<ScheduleCompletedModalProps> = ({
           {/* Go to Home Button */}
           <View style={styles.buttonContainer}>
             <Button
-              variant="secondary"
+              variant="primary"
               outlined={true}
               onPress={onClose}
               fullWidth

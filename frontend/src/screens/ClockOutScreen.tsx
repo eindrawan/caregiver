@@ -15,6 +15,7 @@ import { useScheduleById, useEndVisit, useUpdateTaskStatus, useCancelVisit } fro
 import useScreenSize from '../hooks/useScreenSize';
 import { showAlert } from '../utils/alert';
 import { ContainerView, Footer } from '../components/organisms';
+import { getCurrentLocation, showLocationErrorAlert, LocationError } from '../services/locationService';
 
 type Props = StackScreenProps<HomeStackParamList, 'ClockOut'>;
 
@@ -170,16 +171,34 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
         }
       }
 
+      // Get real location data from device GPS for clock out
+      let location;
+      try {
+        location = await getCurrentLocation();
+      } catch (error: any) {
+        // If location access fails, show error and return
+        if (error instanceof LocationError) {
+          showLocationErrorAlert(error);
+        } else {
+          showAlert(
+            'Location Error',
+            'Failed to get your current location. Please try again.',
+            [{ text: 'OK' }]
+          );
+        }
+        return;
+      }
+
       // End the visit
-      const mockLocation = {
-        end_latitude: 40.7128,
-        end_longitude: -74.0060,
+      const locationData = {
+        end_latitude: location.latitude,
+        end_longitude: location.longitude,
         notes: 'Visit completed successfully',
       };
 
       await endVisitMutation.mutateAsync({
         scheduleId: schedule.id,
-        data: mockLocation,
+        data: locationData,
       });
 
       // Calculate duration for display
