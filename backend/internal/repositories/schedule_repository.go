@@ -61,8 +61,6 @@ func (r *scheduleRepository) GetAll(filter *models.ScheduleFilter) ([]models.Sch
 		}
 	}
 
-	fmt.Println(query)
-
 	// Replace numbered placeholders with actual ? placeholders for SQLite
 	for i := len(args); i >= 1; i-- {
 		query = strings.ReplaceAll(query, fmt.Sprintf("?%d", i), "?")
@@ -179,12 +177,16 @@ func (r *scheduleRepository) GetStats(caregiverID int) (*models.ScheduleStats, e
 
 // Create creates a new schedule
 func (r *scheduleRepository) Create(schedule *models.Schedule) error {
+	// Format time in local timezone to avoid timezone conversion issues
+	startTimeFormatted := schedule.StartTime.Format("2006-01-02 15:04:05")
+	endTimeFormatted := schedule.EndTime.Format("2006-01-02 15:04:05")
+
 	query := `
-		INSERT INTO schedules (client_id, service_name, caregiver_id, start_time, end_time, status, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
+	INSERT INTO schedules (client_id, service_name, caregiver_id, start_time, end_time, status, notes)
+	VALUES (?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := r.db.Exec(query, schedule.ClientID, schedule.ServiceName, schedule.CaregiverID,
-		schedule.StartTime, schedule.EndTime, schedule.Status, schedule.Notes)
+		startTimeFormatted, endTimeFormatted, schedule.Status, schedule.Notes)
 	if err != nil {
 		return fmt.Errorf("failed to create schedule: %w", err)
 	}
@@ -200,14 +202,18 @@ func (r *scheduleRepository) Create(schedule *models.Schedule) error {
 
 // Update updates an existing schedule
 func (r *scheduleRepository) Update(schedule *models.Schedule) error {
+	// Format time in local timezone to avoid timezone conversion issues
+	startTimeFormatted := schedule.StartTime.Format("2006-01-02 15:04:05")
+	endTimeFormatted := schedule.EndTime.Format("2006-01-02 15:04:05")
+
 	query := `
 		UPDATE schedules
 		SET client_id = ?, service_name = ?, caregiver_id = ?, start_time = ?, end_time = ?,
 		    status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
-
+	fmt.Println(query)
 	_, err := r.db.Exec(query, schedule.ClientID, schedule.ServiceName, schedule.CaregiverID,
-		schedule.StartTime, schedule.EndTime, schedule.Status, schedule.Notes, schedule.ID)
+		startTimeFormatted, endTimeFormatted, schedule.Status, schedule.Notes, schedule.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update schedule: %w", err)
 	}

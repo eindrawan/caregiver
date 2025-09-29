@@ -81,7 +81,8 @@ func RateLimitMiddleware(logger *logrus.Logger) gin.HandlerFunc {
 // ValidationMiddleware validates request content type for POST/PUT requests
 func ValidationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.Request.Method == "POST" || c.Request.Method == "PUT" {
+		if (c.Request.Method == "POST" || c.Request.Method == "PUT") && c.Request.ContentLength > 0 {
+			// Only validate content type if there's actual content in the request
 			contentType := c.GetHeader("Content-Type")
 			if contentType != "application/json" && contentType != "application/json; charset=utf-8" {
 				c.JSON(http.StatusBadRequest, gin.H{

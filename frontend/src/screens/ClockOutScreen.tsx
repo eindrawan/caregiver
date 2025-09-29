@@ -74,16 +74,7 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
 
             try {
               await cancelVisitMutation.mutateAsync(schedule.id);
-              showAlert(
-                'Clock-In Cancelled',
-                'Your clock-in has been cancelled successfully.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => navigation.navigate('HomeMain')
-                  }
-                ]
-              );
+              navigation.navigate('HomeMain')
             } catch (error) {
               showAlert(
                 'Cancel Failed',

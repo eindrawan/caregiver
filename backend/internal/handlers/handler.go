@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"caregiver-shift-tracker/internal/middleware"
 	"caregiver-shift-tracker/internal/models"
 	"net/http"
 	"strconv"
@@ -75,11 +76,11 @@ func (h *Handler) SetupRoutes() *gin.Engine {
 
 	// Middleware
 	router.Use(gin.Logger())
-	// router.Use(middleware.ErrorHandlingMiddleware(h.logger))
-	// router.Use(middleware.RequestIDMiddleware())
-	// router.Use(middleware.SecurityHeadersMiddleware())
-	// router.Use(middleware.ValidationMiddleware())
-	// router.Use(middleware.RateLimitMiddleware(h.logger))
+	router.Use(middleware.ErrorHandlingMiddleware(h.logger))
+	router.Use(middleware.RequestIDMiddleware())
+	router.Use(middleware.SecurityHeadersMiddleware())
+	router.Use(middleware.ValidationMiddleware())
+	router.Use(middleware.RateLimitMiddleware(h.logger))
 	router.Use(h.corsMiddleware())
 	router.Use(h.loggingMiddleware())
 
