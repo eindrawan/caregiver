@@ -46,8 +46,19 @@ func (r *visitRepository) GetByScheduleID(scheduleID int) (*models.Visit, error)
 
 // Create creates a new visit
 func (r *visitRepository) Create(visit *models.Visit) error {
-	startTimeFormatted := visit.StartTime.Format("2006-01-02 15:04:05")
-	endTimeFormatted := visit.EndTime.Format("2006-01-02 15:04:05")
+	var startTimeFormatted interface{}
+	if visit.StartTime != nil {
+		startTimeFormatted = visit.StartTime.UTC().Format("2006-01-02 15:04:05")
+	} else {
+		startTimeFormatted = nil
+	}
+
+	var endTimeFormatted interface{}
+	if visit.EndTime != nil {
+		endTimeFormatted = visit.EndTime.UTC().Format("2006-01-02 15:04:05")
+	} else {
+		endTimeFormatted = nil
+	}
 
 	query := `
 	INSERT INTO visits (schedule_id, start_time, end_time, start_latitude, start_longitude,
@@ -72,8 +83,19 @@ func (r *visitRepository) Create(visit *models.Visit) error {
 
 // Update updates an existing visit
 func (r *visitRepository) Update(visit *models.Visit) error {
-	startTimeFormatted := visit.StartTime.Format("2006-01-02 15:04:05")
-	endTimeFormatted := visit.EndTime.Format("2006-01-02 15:04:05")
+	var startTimeFormatted interface{}
+	if visit.StartTime != nil {
+		startTimeFormatted = visit.StartTime.UTC().Format("2006-01-02 15:04:05")
+	} else {
+		startTimeFormatted = nil
+	}
+
+	var endTimeFormatted interface{}
+	if visit.EndTime != nil {
+		endTimeFormatted = visit.EndTime.UTC().Format("2006-01-02 15:04:05")
+	} else {
+		endTimeFormatted = nil
+	}
 
 	query := `
 	UPDATE visits

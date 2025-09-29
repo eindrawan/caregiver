@@ -72,14 +72,14 @@ type Task struct {
 
 // VisitStartRequest represents the request to start a visit
 type VisitStartRequest struct {
-	Latitude  float64 `json:"latitude" validate:"required,min=-90,max=90"`
-	Longitude float64 `json:"longitude" validate:"required,min=-180,max=180"`
+	Latitude  float64 `json:"start_latitude" validate:"required,min=-90,max=90"`
+	Longitude float64 `json:"start_longitude" validate:"required,min=-180,max=180"`
 }
 
 // VisitEndRequest represents the request to end a visit
 type VisitEndRequest struct {
-	Latitude  float64 `json:"latitude" validate:"required,min=-90,max=90"`
-	Longitude float64 `json:"longitude" validate:"required,min=-180,max=180"`
+	Latitude  float64 `json:"end_latitude" validate:"required,min=-90,max=90"`
+	Longitude float64 `json:"end_longitude" validate:"required,min=-180,max=180"`
 	Notes     string  `json:"notes"`
 }
 

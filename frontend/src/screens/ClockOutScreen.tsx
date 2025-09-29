@@ -8,7 +8,7 @@ import {
 import { StackScreenProps } from '@react-navigation/stack';
 import { colors, spacing, borderRadius } from '../constants';
 import { Text, Button, Icon } from '../components/atoms';
-import { UserInfo, TaskItem, HeaderWithBackButton } from '../components/molecules';
+import { UserInfo, TaskItem, HeaderWithBackButton, MapCard } from '../components/molecules';
 import { ScheduleCompletedModal } from '../components/modals';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useScheduleById, useEndVisit, useUpdateTaskStatus, useCancelVisit } from '../hooks';
@@ -291,7 +291,7 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
 
           {/* Add New Task Button */}
           <TouchableOpacity style={styles.addTaskButton} onPress={handleAddNewTask}>
-            <Icon name="add" size={20} color="primary" />
+            <Icon name="add" size={20} color="accentBackgroundDark" />
             <Text variant="button" color="primary" style={styles.addTaskText}>
               Add new task
             </Text>
@@ -303,19 +303,7 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
           <Text variant="title" style={styles.sectionTitle}>
             Clock-In Location
           </Text>
-          <View style={styles.locationCard}>
-            <View style={styles.mapPlaceholder}>
-              <Icon name="location" size={40} color="primary" />
-            </View>
-            <View style={styles.locationInfo}>
-              <Text variant="body" color="textPrimary" style={styles.locationAddress}>
-                {schedule.client?.address || 'No address available'}
-              </Text>
-              <Text variant="body" color="textSecondary" style={styles.locationDetails}>
-                {schedule.client?.city}, {schedule.client?.state}, {schedule.client?.zip_code}
-              </Text>
-            </View>
-          </View>
+          <MapCard schedule={schedule} />
         </View>
 
         {/* Service Notes */}
@@ -424,13 +412,12 @@ const styles = StyleSheet.create({
   addTaskButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingVertical: spacing.md,
     gap: spacing.sm,
-    marginTop: spacing.sm,
   },
   addTaskText: {
-    fontWeight: '600',
+    fontWeight: '400',
   },
   locationCard: {
     flexDirection: 'row',

@@ -70,9 +70,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (currentSchedule?.status === 'in_progress') {
+    if (currentSchedule?.status === 'in_progress' && currentSchedule.visit?.start_time) {
       // Calculate elapsed time from start_time to now
-      const startTime = new Date(currentSchedule.start_time).getTime();
+      const startTime = new Date(currentSchedule.visit?.start_time).getTime();
       const updateElapsed = () => {
         const now = Date.now();
         const elapsed = Math.floor((now - startTime) / 1000); // in seconds

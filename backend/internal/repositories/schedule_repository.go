@@ -37,7 +37,7 @@ func (r *scheduleRepository) GetAll(filter *models.ScheduleFilter) ([]models.Sch
 		}
 		if filter.Date != nil {
 			query += fmt.Sprintf(" AND DATE(s.start_time) = DATE(?%d)", argIndex)
-			args = append(args, filter.Date.Format("2006-01-02"))
+			args = append(args, filter.Date.UTC().Format("2006-01-02"))
 			argIndex++
 		}
 		if filter.Status != nil {
@@ -178,8 +178,8 @@ func (r *scheduleRepository) GetStats(caregiverID int) (*models.ScheduleStats, e
 // Create creates a new schedule
 func (r *scheduleRepository) Create(schedule *models.Schedule) error {
 	// Format time in local timezone to avoid timezone conversion issues
-	startTimeFormatted := schedule.StartTime.Format("2006-01-02 15:04:05")
-	endTimeFormatted := schedule.EndTime.Format("2006-01-02 15:04:05")
+	startTimeFormatted := schedule.StartTime.UTC().Format("2006-01-02 15:04:05")
+	endTimeFormatted := schedule.EndTime.UTC().Format("2006-01-02 15:04:05")
 
 	query := `
 	INSERT INTO schedules (client_id, service_name, caregiver_id, start_time, end_time, status, notes)
@@ -203,8 +203,8 @@ func (r *scheduleRepository) Create(schedule *models.Schedule) error {
 // Update updates an existing schedule
 func (r *scheduleRepository) Update(schedule *models.Schedule) error {
 	// Format time in local timezone to avoid timezone conversion issues
-	startTimeFormatted := schedule.StartTime.Format("2006-01-02 15:04:05")
-	endTimeFormatted := schedule.EndTime.Format("2006-01-02 15:04:05")
+	startTimeFormatted := schedule.StartTime.UTC().Format("2006-01-02 15:04:05")
+	endTimeFormatted := schedule.EndTime.UTC().Format("2006-01-02 15:04:05")
 
 	query := `
 		UPDATE schedules
