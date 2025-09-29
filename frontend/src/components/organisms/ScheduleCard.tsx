@@ -68,7 +68,8 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
         return (
           <View style={styles.buttonRow}>
             <Button
-              variant="outline"
+              variant="primary"
+              outlined={true}
               onPress={onViewProgress}
               style={styles.halfButton}
               rounded
@@ -88,7 +89,8 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
       case 'completed':
         return (
           <Button
-            variant="outline"
+            variant="primary"
+            outlined={true}
             onPress={onViewProgress}
             fullWidth
             rounded

@@ -208,7 +208,8 @@ const ScheduleCompletedScreen: React.FC<Props> = ({ route, navigation }) => {
         {/* Go to Home Button */}
         <View style={styles.buttonContainer}>
           <Button
-            variant="outline"
+            variant="secondary"
+            outlined={true}
             onPress={handleGoHome}
             fullWidth
             style={styles.homeButton}

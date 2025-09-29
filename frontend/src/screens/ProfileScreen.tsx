@@ -16,7 +16,7 @@ const ProfileScreen: React.FC = () => {
         <Text variant="h2" color="textPrimary" style={styles.welcomeText}>
           Welcome Louis!
         </Text>
-        <Button variant="outline" fullWidth style={styles.logoutText}>
+        <Button variant="error" outlined={true} fullWidth>
           Log Out
         </Button>
       </View>
@@ -43,10 +43,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
-  },
-  logoutText: {
-    color: colors.error,
-    textAlign: 'center',
   },
 });
 

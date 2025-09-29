@@ -333,7 +333,8 @@ const ClockOutScreen: React.FC<Props> = ({ route, navigation }) => {
         {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
           <Button
-            variant="outline"
+            variant="error"
+            outlined={true}
             onPress={handleCancelClockIn}
             style={styles.cancelButton}
             disabled={endVisitMutation.isPending || updateTaskMutation.isPending || cancelVisitMutation.isPending}

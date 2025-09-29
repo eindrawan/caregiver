@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
+  useWindowDimensions,
 } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { colors, spacing, borderRadius, shadows } from '../constants';
@@ -23,6 +24,10 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   const { data: schedule, isLoading, error } = useScheduleById(scheduleId);
   const startVisitMutation = useStartVisit();
   const [isClockingIn, setIsClockingIn] = useState(false);
+
+  // Detect large screen (e.g., tablets)
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width >= 768;
 
   const formatTime = (timeString: string) => {
     return new Date(timeString).toLocaleTimeString('en-US', {
@@ -132,9 +137,6 @@ const ScheduleDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
     );
   }
 
-  // Detect large screen (e.g., tablets)
-  const { width } = require('react-native').useWindowDimensions();
-  const isLargeScreen = width >= 768;
 
   return (
     <ContainerView style={styles.container} title="Schedule Details" onBackPress={() => navigation.goBack()}>

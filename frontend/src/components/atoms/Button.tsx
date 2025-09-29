@@ -6,9 +6,10 @@ import TextComponent from './Text';
 interface Props {
     title?: string;
     onPress: () => void;
-    variant?: 'primary' | 'outline' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'error';
     disabled?: boolean;
     rounded?: boolean;
+    outlined?: boolean;
     fullWidth?: boolean;
     style?: any;
     children?: React.ReactNode;
@@ -21,6 +22,7 @@ const Button: React.FC<Props> = ({
     disabled = false,
     fullWidth = false,
     rounded = false,
+    outlined = false,
     style,
     children
 }) => {
@@ -37,7 +39,7 @@ const Button: React.FC<Props> = ({
         color: colors.textOnPrimary,
     };
 
-    const outlineStyle = {
+    const primaryOutlinedStyle = {
         backgroundColor: 'transparent',
         borderColor: colors.accentBackgroundDark,
     };
@@ -47,14 +49,31 @@ const Button: React.FC<Props> = ({
         borderColor: colors.white,
     };
 
+    const secondaryOutlinedStyle = {
+        backgroundColor: colors.white,
+        borderColor: colors.white,
+    };
+
+    const errorStyle = {
+        backgroundColor: colors.error,
+        borderColor: colors.error,
+        color: colors.textOnPrimary,
+    };
+
+    const errorOutlinedStyle = {
+        backgroundColor: 'transparent',
+        borderColor: colors.error,
+        color: colors.error,
+    };
+
     const getButtonStyle = () => {
         switch (variant) {
             case 'primary':
-                return primaryStyle;
-            case 'outline':
-                return outlineStyle;
+                return outlined ? primaryOutlinedStyle : primaryStyle;
             case 'secondary':
-                return secondaryStyle;
+                return outlined ? secondaryOutlinedStyle : secondaryStyle;
+            case 'error':
+                return outlined ? errorOutlinedStyle : errorStyle;
             default:
                 return primaryStyle;
         }
@@ -63,11 +82,11 @@ const Button: React.FC<Props> = ({
     const getTextColor = () => {
         switch (variant) {
             case 'primary':
-                return 'textOnPrimary';
-            case 'outline':
-                return 'primary';
+                return outlined ? 'primary' : 'textOnPrimary';
             case 'secondary':
-                return 'primary';
+                return outlined ? 'textOnPrimary' : 'primary';
+            case 'error':
+                return outlined ? 'error' : 'textOnPrimary';
             default:
                 return 'textOnPrimary';
         }
