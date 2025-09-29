@@ -126,6 +126,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 start_longitude: location.longitude,
               };
 
+              // Reset error state before attempting to mutate again
+              if (startVisitMutation.isError) {
+                startVisitMutation.reset();
+              }
+
               startVisitMutation.mutate({
                 scheduleId: schedule.id,
                 data: locationData,

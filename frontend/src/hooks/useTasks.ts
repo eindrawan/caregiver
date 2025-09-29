@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskApi } from '../services/api';
 import { Task, UpdateTaskRequest } from '../services/types';
+import { useErrorStore } from '../stores/errorStore';
 
 // Query keys for tasks
 export const taskKeys = {
@@ -34,8 +35,9 @@ export const useUpdateTaskStatus = () => {
       // Invalidate schedule queries to refresh task lists
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
     },
-    onError: (error) => {
-      console.error('Failed to update task status:', error);
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.details || error.message || 'Failed to update task status';
+      useErrorStore.getState().setError(errMsg);
     },
   });
 };
@@ -60,8 +62,9 @@ export const useUpdateMultipleTasks = () => {
       // Invalidate schedule queries to refresh task lists
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
     },
-    onError: (error) => {
-      console.error('Failed to update multiple tasks:', error);
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.details || error.message || 'Failed to update multiple tasks';
+      useErrorStore.getState().setError(errMsg);
     },
   });
 };

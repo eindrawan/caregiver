@@ -11,7 +11,7 @@ interface Props {
 
 const Avatar: React.FC<Props> = ({ size = 'medium', name, imageUrl, source }) => {
     const sizes = {
-        small: 32,
+        small: 40,
         medium: 48,
         large: 64,
     };

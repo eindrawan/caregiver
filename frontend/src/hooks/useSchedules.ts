@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scheduleApi } from '../services/api';
 import { Schedule, ScheduleStats, StartVisitRequest, EndVisitRequest } from '../services/types';
+import { useErrorStore } from '../stores/errorStore';
 
 // Query keys
 export const scheduleKeys = {
@@ -44,7 +45,7 @@ export const useScheduleById = (id: number) => {
 
 // Mutations for visit management
 export const useStartVisit = () => {
-  const queryClient = useQueryClient();
+ const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: ({ scheduleId, data }: { scheduleId: number; data: StartVisitRequest }) =>
@@ -52,6 +53,10 @@ export const useStartVisit = () => {
     onSuccess: () => {
       // Invalidate and refetch schedule data
       queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
+    },
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.details || error.message || 'Failed to start visit';
+      useErrorStore.getState().setError(errMsg);
     },
   });
 };
@@ -66,6 +71,10 @@ export const useEndVisit = () => {
       // Invalidate and refetch schedule data
       queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
     },
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.details || error.message || 'Failed to end visit';
+      useErrorStore.getState().setError(errMsg);
+    },
   });
 };
 
@@ -77,6 +86,10 @@ export const useCancelVisit = () => {
     onSuccess: () => {
       // Invalidate and refetch schedule data
       queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
+    },
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.details || error.message || 'Failed to cancel visit';
+      useErrorStore.getState().setError(errMsg);
     },
   });
 };
