@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions, Modal } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Modal, Image } from 'react-native';
 import { colors, spacing, borderRadius } from '../../constants';
 import { Text, Icon } from '../atoms';
 import { UserInfo } from '../molecules';
@@ -46,12 +46,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         <View style={styles.container}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <View style={styles.logoContainer}>
-              <Icon name="heart" size={24} color="primary" />
-              <Text variant="h3" color="primary" style={styles.logoText}>
-                Careviah
-              </Text>
-            </View>
+            <Image
+              source={require('../../assets/careviah.png')}
+              style={styles.logoImage}
+            />
           </View>
 
           {/* User Profile Section */}
@@ -123,23 +121,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.screenPadding,
-    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     backgroundColor: colors.accentBackground,
     borderRadius: borderRadius.xl,
   },
   logoSection: {
     flex: 1,
   },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  logoImage: {
+    width: 180,
+    height: 50,
+    resizeMode: 'contain',
   },
-  logoText: {
-    fontWeight: '700',
-    letterSpacing: -0.5,
-  },
+
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
