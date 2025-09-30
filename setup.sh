@@ -15,7 +15,7 @@ cd ..
 
 echo "Installing frontend dependencies..."
 cd frontend
-npm install
+npm install --legacy-peer-deps
 
 echo "Starting frontend development server..."
 npx expo start &
