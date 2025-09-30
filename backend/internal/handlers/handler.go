@@ -31,7 +31,7 @@ type VisitServiceInterface interface {
 // TaskServiceInterface defines the interface for task service
 type TaskServiceInterface interface {
 	GetTaskByID(id int) (*models.Task, error)
-	UpdateTaskStatus(id int, req *models.TaskUpdateRequest) error
+	UpdateTaskStatus(id int, req *models.TaskUpdateRequest) (*models.Task, error)
 }
 
 // ClientServiceInterface defines the interface for client service

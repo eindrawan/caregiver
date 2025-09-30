@@ -63,7 +63,7 @@ func (r *visitRepository) Create(visit *models.Visit) error {
 	query := `
 	INSERT INTO visits (schedule_id, start_time, end_time, start_latitude, start_longitude,
 		                   end_latitude, end_longitude, location_status, status, notes, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 
 	result, err := r.db.Exec(query, visit.ScheduleID, startTimeFormatted, endTimeFormatted,
 		visit.StartLatitude, visit.StartLongitude, visit.EndLatitude, visit.EndLongitude,

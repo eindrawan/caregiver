@@ -71,6 +71,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
     try {
       const location = await getCurrentLocation();
       action(location);
+      setIsLoadingLocation(false);
     } catch (error: any) {
       setIsLoadingLocation(false);
       const errorCode = error.code || 'UNKNOWN_ERROR';
@@ -89,16 +90,6 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
           break;
         case 'POSITION_UNAVAILABLE':
           setShowManualInput(true);
-          break;
-        case 'TIMEOUT':
-          // Auto-retry once
-          try {
-            const location = await getCurrentLocation();
-            action(location);
-          } catch (retryError) {
-            setIsLoadingLocation(false);
-            setShowManualInput(true);
-          }
           break;
         default:
           showAlert(
@@ -129,6 +120,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
       // Call the action with the geocoded location
       if (onClockIn) onClockIn(location);
       else if (onClockOut) onClockOut(location);
+      setIsLoadingLocation(false);
     } catch (error) {
       setIsLoadingLocation(false);
       showAlert(

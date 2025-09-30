@@ -60,7 +60,7 @@ func (s *TaskService) GetTaskByID(id int) (*models.Task, error) {
 }
 
 // UpdateTaskStatus updates the status of a task
-func (s *TaskService) UpdateTaskStatus(id int, req *models.TaskUpdateRequest) error {
+func (s *TaskService) UpdateTaskStatus(id int, req *models.TaskUpdateRequest) (*models.Task, error) {
 	s.logger.WithFields(logrus.Fields{
 		"task_id": id,
 		"status":  req.Status,
@@ -70,29 +70,36 @@ func (s *TaskService) UpdateTaskStatus(id int, req *models.TaskUpdateRequest) er
 	// Validate the request
 	if err := s.validateTaskUpdateRequest(req); err != nil {
 		s.logger.WithError(err).WithField("task_id", id).Error("Task update validation failed")
-		return fmt.Errorf("task update validation failed: %w", err)
+		return nil, fmt.Errorf("task update validation failed: %w", err)
 	}
 
 	// Check if task exists
 	task, err := s.taskRepo.GetByID(id)
 	if err != nil {
 		s.logger.WithError(err).WithField("task_id", id).Error("Failed to get task")
-		return fmt.Errorf("failed to get task: %w", err)
+		return nil, fmt.Errorf("failed to get task: %w", err)
 	}
 
 	if task == nil {
 		s.logger.WithField("task_id", id).Warn("Task not found")
-		return fmt.Errorf("task not found")
+		return nil, fmt.Errorf("task not found")
 	}
 
 	// Update the task status
 	if err := s.taskRepo.UpdateStatus(id, req.Status, req.Reason); err != nil {
 		s.logger.WithError(err).WithField("task_id", id).Error("Failed to update task status")
-		return fmt.Errorf("failed to update task status: %w", err)
+		return nil, fmt.Errorf("failed to update task status: %w", err)
+	}
+
+	// Get the updated task to return
+	updatedTask, err := s.taskRepo.GetByID(id)
+	if err != nil {
+		s.logger.WithError(err).WithField("task_id", id).Error("Failed to get updated task")
+		return nil, fmt.Errorf("failed to get updated task: %w", err)
 	}
 
 	s.logger.WithField("task_id", id).Info("Successfully updated task status")
-	return nil
+	return updatedTask, nil
 }
 
 // CreateTask creates a new task

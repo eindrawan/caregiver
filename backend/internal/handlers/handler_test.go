@@ -86,9 +86,12 @@ func (m *MockTaskService) GetTaskByID(id int) (*models.Task, error) {
 	return args.Get(0).(*models.Task), args.Error(1)
 }
 
-func (m *MockTaskService) UpdateTaskStatus(id int, req *models.TaskUpdateRequest) error {
+func (m *MockTaskService) UpdateTaskStatus(id int, req *models.TaskUpdateRequest) (*models.Task, error) {
 	args := m.Called(id, req)
-	return args.Error(0)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Task), args.Error(1)
 }
 
 // MockClientService is a mock implementation of ClientService
@@ -289,7 +292,14 @@ func TestHandler_UpdateTaskStatus(t *testing.T) {
 	}
 
 	// Mock expectations
-	mockTaskService.On("UpdateTaskStatus", 1, &requestBody).Return(nil)
+	expectedTask := &models.Task{
+		ID:          1,
+		ScheduleID:  1,
+		Title:       "Give medication",
+		Status:      "completed",
+		Description: "Administer morning medications",
+	}
+	mockTaskService.On("UpdateTaskStatus", 1, &requestBody).Return(expectedTask, nil)
 
 	// Create request
 	jsonBody, _ := json.Marshal(requestBody)
@@ -307,7 +317,7 @@ func TestHandler_UpdateTaskStatus(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response["success"].(bool))
-	assert.Equal(t, "Task status updated successfully", response["message"])
+	assert.Equal(t, expectedTask.ID, int(response["data"].(map[string]interface{})["id"].(float64)))
 
 	// Verify mock expectations
 	mockTaskService.AssertExpectations(t)

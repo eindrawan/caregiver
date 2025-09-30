@@ -50,7 +50,7 @@ func (h *Handler) getTaskByID(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Task ID"
 // @Param request body models.TaskUpdateRequest true "Task update request with status and optional reason"
-// @Success 200 {object} map[string]interface{} "success response"
+// @Success 200 {object} map[string]interface{} "success response with updated task"
 // @Failure 400 {object} map[string]interface{} "bad request"
 // @Failure 404 {object} map[string]interface{} "task not found"
 // @Failure 500 {object} map[string]interface{} "internal server error"
@@ -68,7 +68,8 @@ func (h *Handler) updateTaskStatus(c *gin.Context) {
 		return
 	}
 
-	if err := h.taskService.UpdateTaskStatus(id, &req); err != nil {
+	updatedTask, err := h.taskService.UpdateTaskStatus(id, &req)
+	if err != nil {
 		if err.Error() == "task not found" {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "Task not found",
@@ -79,8 +80,5 @@ func (h *Handler) updateTaskStatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Task status updated successfully",
-	})
+	h.successResponse(c, updatedTask)
 }

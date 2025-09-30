@@ -50,7 +50,7 @@ const Button: React.FC<Props> = ({
     };
 
     const secondaryOutlinedStyle = {
-        backgroundColor: colors.white,
+        backgroundColor: 'transparent',
         borderColor: colors.white,
     };
 

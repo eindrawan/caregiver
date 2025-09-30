@@ -212,11 +212,8 @@ const ScheduleCompletedScreen: React.FC<Props> = ({ route, navigation }) => {
             outlined={true}
             onPress={handleGoHome}
             fullWidth
-            style={styles.homeButton}
           >
-            <Text variant="button" color="textOnPrimary">
-              Go to Home
-            </Text>
+            Go to Home
           </Button>
         </View>
       </Animated.View>
@@ -344,11 +341,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     paddingBottom: spacing.xl,
     paddingTop: spacing.xxxl,
-  },
-  homeButton: {
-    borderColor: '#fff',
-    borderWidth: 1,
-    backgroundColor: 'transparent',
   },
 });
 

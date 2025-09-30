@@ -105,14 +105,24 @@ func TestTaskService_UpdateTaskStatus_Completed(t *testing.T) {
 	}
 
 	// Mock expectations
-	mockTaskRepo.On("GetByID", 1).Return(task, nil)
+	updatedTask := &models.Task{
+		ID:          1,
+		ScheduleID:  1,
+		Title:       "Give medication",
+		Status:      "completed",
+		Description: "Administer morning medications",
+	}
+	mockTaskRepo.On("GetByID", 1).Return(task, nil).Once() // First call returns original task
 	mockTaskRepo.On("UpdateStatus", 1, "completed", "").Return(nil)
+	mockTaskRepo.On("GetByID", 1).Return(updatedTask, nil).Once() // Second call returns updated task
 
 	// Execute
-	err := service.UpdateTaskStatus(1, req)
+	updatedTask, err := service.UpdateTaskStatus(1, req)
 
 	// Assert
 	assert.NoError(t, err)
+	assert.NotNil(t, updatedTask)
+	assert.Equal(t, "completed", updatedTask.Status)
 
 	// Verify mock expectations
 	mockTaskRepo.AssertExpectations(t)
@@ -137,14 +147,26 @@ func TestTaskService_UpdateTaskStatus_NotCompleted(t *testing.T) {
 	}
 
 	// Mock expectations
-	mockTaskRepo.On("GetByID", 1).Return(task, nil)
+	updatedTask2 := &models.Task{
+		ID:          1,
+		ScheduleID:  1,
+		Title:       "Give medication",
+		Status:      "not_completed",
+		Description: "Administer morning medications",
+		Reason:      "Client refused medication",
+	}
+	mockTaskRepo.On("GetByID", 1).Return(task, nil).Once() // First call returns original task
 	mockTaskRepo.On("UpdateStatus", 1, "not_completed", "Client refused medication").Return(nil)
+	mockTaskRepo.On("GetByID", 1).Return(updatedTask2, nil).Once() // Second call returns updated task
 
 	// Execute
-	err := service.UpdateTaskStatus(1, req)
+	updatedTask, err := service.UpdateTaskStatus(1, req)
 
 	// Assert
 	assert.NoError(t, err)
+	assert.NotNil(t, updatedTask)
+	assert.Equal(t, "not_completed", updatedTask.Status)
+	assert.Equal(t, "Client refused medication", updatedTask.Reason)
 
 	// Verify mock expectations
 	mockTaskRepo.AssertExpectations(t)
@@ -164,11 +186,12 @@ func TestTaskService_UpdateTaskStatus_TaskNotFound(t *testing.T) {
 	mockTaskRepo.On("GetByID", 999).Return(nil, nil)
 
 	// Execute
-	err := service.UpdateTaskStatus(999, req)
+	updatedTask, err := service.UpdateTaskStatus(999, req)
 
 	// Assert
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "task not found")
+	assert.Nil(t, updatedTask)
 
 	// Verify mock expectations
 	mockTaskRepo.AssertExpectations(t)
@@ -186,11 +209,12 @@ func TestTaskService_UpdateTaskStatus_ValidationError_MissingReason(t *testing.T
 	}
 
 	// Execute
-	err := service.UpdateTaskStatus(1, req)
+	updatedTask, err := service.UpdateTaskStatus(1, req)
 
 	// Assert
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "reason is required when status is not_completed")
+	assert.Nil(t, updatedTask)
 }
 
 func TestTaskService_UpdateTaskStatus_ValidationError_InvalidStatus(t *testing.T) {
@@ -204,11 +228,12 @@ func TestTaskService_UpdateTaskStatus_ValidationError_InvalidStatus(t *testing.T
 	}
 
 	// Execute
-	err := service.UpdateTaskStatus(1, req)
+	updatedTask, err := service.UpdateTaskStatus(1, req)
 
 	// Assert
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid status")
+	assert.Nil(t, updatedTask)
 }
 
 func TestTaskService_CreateTask(t *testing.T) {
